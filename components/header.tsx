@@ -30,7 +30,7 @@ export default function Header() {
 
     {
       label: "Chat",
-      href: "/Chat",
+      href: "/chat",
     },
   ];
   return (
