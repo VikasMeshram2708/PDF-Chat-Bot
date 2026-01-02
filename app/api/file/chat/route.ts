@@ -15,12 +15,11 @@ const ai = new GoogleGenAI({
   apiKey: env.GOOGLE_API_KEY,
 });
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const q = searchParams.get("q");
+    const body = await req.json();
     // parse
-    const parsed = querySchema.safeParse({ q });
+    const parsed = querySchema.safeParse(body);
     console.log(
       "e",
       parsed.error?.issues.map((i) => `error at : ${i.path} - ${i.message}}`)
@@ -39,6 +38,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const { q } = parsed.data;
     const embeddings = new GoogleGenerativeAIEmbeddings({
       model: "text-embedding-004",
       apiKey: env.GOOGLE_API_KEY,

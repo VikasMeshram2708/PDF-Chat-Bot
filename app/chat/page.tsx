@@ -1,4 +1,5 @@
 import ChatBox from "./chat-box";
+import ChatMessages from "./chat-messages";
 import UploadArea from "./upload-area";
 
 export default function ChatPage() {
@@ -12,6 +13,7 @@ export default function ChatPage() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             {/* messages here */}
+            <ChatMessages />
           </div>
 
           {/* Input */}
