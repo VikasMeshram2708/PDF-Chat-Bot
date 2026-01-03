@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
     const context = results
       .map((doc, i) => `Source ${i + 1}:\n${doc.pageContent}`)
       .join("\n\n");
-    const response = await ai.models.generateContent({
+
+    // Response
+    const stream = await ai.models.generateContentStream({
       model: "gemini-2.5-flash",
       contents: [
         {
@@ -81,11 +83,38 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    return NextResponse.json({
-      success: true,
-      answer: response.text,
-      sources: results.map((r) => r.metadata),
-    });
+    const encoder = new TextEncoder();
+
+    return new Response(
+      new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of stream) {
+              const text = chunk.text;
+              // console.log("SERVER CHUNK:", text);
+              if (text) {
+                controller.enqueue(encoder.encode(text));
+              }
+            }
+            controller.close();
+          } catch (error) {
+            const err = error as Error;
+            controller.error(err.message);
+          }
+        },
+      }),
+      {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      }
+    );
+
+    // return NextResponse.json({
+    //   success: true,
+    //   answer: response.text,
+    //   sources: results.map((r) => r.metadata),
+    // });
   } catch (error) {
     const err = error as Error;
     return NextResponse.json(
