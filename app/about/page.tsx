@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 
+// TODO: Show about myself also
 export default function AboutPage() {
   return (
     <div className="min-h-screen">
@@ -10,7 +11,7 @@ export default function AboutPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 py-24"
+        className="mx-auto max-w-4xl px-6 py-16"
       >
         <h1 className="text-4xl font-semibold tracking-tight">
           About PDF Chat Bot
@@ -28,7 +29,7 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 py-16"
+        className="mx-auto max-w-4xl px-6 py-6"
       >
         <h2 className="text-2xl font-medium">Our Mission</h2>
 
@@ -45,7 +46,7 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 py-16"
+        className="mx-auto max-w-4xl px-6 py-6"
       >
         <h2 className="text-2xl font-medium">What PDF Chat Bot Does</h2>
 
@@ -71,7 +72,7 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 py-16"
+        className="mx-auto max-w-4xl px-6 py-6"
       >
         <h2 className="text-2xl font-medium">Why We Built It</h2>
 
@@ -89,7 +90,7 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 py-24"
+        className="mx-auto max-w-4xl px-6 py-6"
       >
         <h2 className="text-2xl font-medium">Built for Clarity</h2>
 

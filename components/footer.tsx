@@ -1,4 +1,4 @@
-import { FileIcon } from "lucide-react";
+import { MessageSquareCodeIcon } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {
@@ -21,7 +21,7 @@ export function Footer() {
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-center">
           <Link href="/" className="flex items-center gap-2">
-            <FileIcon className="size-6 text-primary" />
+            <MessageSquareCodeIcon className="size-6 text-primary" />
             <h1 className="text-2xl font-bold">PDF Chat Bot</h1>
           </Link>
         </div>

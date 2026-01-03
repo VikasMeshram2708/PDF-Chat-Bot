@@ -30,7 +30,7 @@ export function UploadArea() {
   };
 
   return (
-    <section className="fixed w-full">
+    <section className="w-sm">
       <Card
         className="border max-w-sm cursor-pointer hover:shadow-md transition-shadow"
         onClick={handleFileSelect}

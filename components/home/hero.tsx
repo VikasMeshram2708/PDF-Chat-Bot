@@ -23,9 +23,7 @@ export default function Hero() {
       className="
         relative
         mx-auto max-w-7xl
-        px-4 sm:px-6 lg:px-8
-        pt-16 sm:pt-20 lg:pt-28
-        pb-12 sm:pb-16 lg:pb-24
+        px-4 py-14 
       "
     >
       {/* Badge (floats slightly away from main flow) */}
