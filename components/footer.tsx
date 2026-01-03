@@ -17,7 +17,7 @@ export function Footer() {
     },
   ];
   return (
-    <footer className="border-t border border-border p-10">
+    <footer className="border-t border-border p-10">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-center">
           <Link href="/" className="flex items-center gap-2">
