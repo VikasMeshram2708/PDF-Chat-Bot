@@ -4,53 +4,93 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { env } from "@/app/env";
+import { db } from "@/db";
+import { docSchema } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const processPDF = inngest.createFunction(
   { id: "process_pdf" },
   { event: "pdf/uploaded" },
 
   async ({ event, step }) => {
-    const { fileName, filePath } = event.data;
+    const { documentId, fileName, filePath } = event.data;
 
-    await step.run("parse_and_embed_pdf", async () => {
-      console.log("Processing PDF:", fileName);
+    try {
+      // processing
+      await db
+        .update(docSchema)
+        .set({
+          status: "processing",
+        })
+        .where(eq(docSchema.id, documentId));
 
-      /** 1️⃣ Load PDF */
-      const loader = new PDFLoader(filePath);
-      const docs = await loader.load();
-      console.log("docs", docs);
+      const chunkCount = await step.run("parse_and_embed_pdf", async () => {
+        const loader = new PDFLoader(filePath);
+        const docs = await loader.load();
 
-      /** 2️⃣ Split text */
-      const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 200,
+        const splitter = new RecursiveCharacterTextSplitter({
+          chunkSize: 1000,
+          chunkOverlap: 200,
+        });
+
+        const splitDocs = await splitter.splitDocuments(docs);
+
+        const embeddings = new GoogleGenerativeAIEmbeddings({
+          model: "text-embedding-004",
+          apiKey: env.GOOGLE_API_KEY,
+        });
+
+        const vectorStore = await QdrantVectorStore.fromExistingCollection(
+          embeddings,
+          {
+            url: env.QUADRANT_URL,
+            apiKey: env.QUADRANT_API_KEY,
+            collectionName: "PDF Chat Bot",
+          }
+        );
+
+        await vectorStore.addDocuments(splitDocs);
+
+        return splitDocs.length;
       });
 
-      const splitDocs = await splitter.splitDocuments(docs);
-      console.log("splitDocs", splitDocs);
+      await db
+        .update(docSchema)
+        .set({
+          status: "completed",
+        })
+        .where(eq(docSchema.id, documentId));
 
-      /** 3️⃣ Create embeddings (LAZY) */
-      const embeddings = new GoogleGenerativeAIEmbeddings({
-        model: "text-embedding-004",
-        apiKey: env.GOOGLE_API_KEY,
+      // EMIT COMPLETION EVENT
+      await step.sendEvent("emit_completion", {
+        name: "pdf/ingest.completed",
+        data: {
+          documentId,
+          fileName,
+          chunks: chunkCount,
+        },
       });
 
-      /** 4️⃣ Connect to Qdrant */
-      const vectorStore = await QdrantVectorStore.fromExistingCollection(
-        embeddings,
-        {
-          url: env.QUADRANT_URL, // endpoint
-          apiKey: env.QUADRANT_API_KEY, // key (cloud only)
-          collectionName: "PDF Chat Bot",
-        }
-      );
+      return { success: true };
+    } catch (error) {
+      // EMIT FAILURE EVENT
+      await db
+        .update(docSchema)
+        .set({
+          status: "failed",
+        })
+        .where(eq(docSchema.id, documentId));
 
-      /** 5️⃣ Store embeddings */
-      await vectorStore.addDocuments(splitDocs);
+      await step.sendEvent("emit_failure", {
+        name: "pdf/ingest.failed",
+        data: {
+          documentId,
+          fileName,
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+      });
 
-      console.log("Stored", splitDocs.length, "chunks");
-    });
-
-    return { success: true };
+      throw error;
+    }
   }
 );

@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { inngest } from "@/app/inngest/client";
+import { db } from "@/db";
+import { docSchema } from "@/db/schema";
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await currentUser();
     const formData = await req.formData();
     const file = formData.get("pdf") as File | null;
 
@@ -15,7 +19,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Validate PDF
     if (file.type !== "application/pdf") {
       return NextResponse.json(
         { success: false, message: "Only PDF files are allowed" },
@@ -23,33 +26,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Create uploads directory
     const uploadDir = path.join(process.cwd(), "uploads");
-
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    // ✅ Generate filename
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `pdf-${Date.now()}.pdf`;
     const filePath = path.join(uploadDir, fileName);
 
-    // ✅ Save file
     fs.writeFileSync(filePath, buffer);
 
-    // ingest trigger
+    const [doc] = await db
+      .insert(docSchema)
+      .values({
+        userId: user?.id as string,
+        fileName,
+        filePath,
+        status: "queued",
+      })
+      .returning();
+
     await inngest.send({
       name: "pdf/uploaded",
       data: {
+        documentId: doc.id,
         fileName,
         filePath,
       },
     });
+
     return NextResponse.json({
       success: true,
-      message: "File uploaded successfully",
-      fileName,
+      message: "File uploaded",
+      documentId: doc.id,
     });
   } catch (error) {
     console.error(error);
