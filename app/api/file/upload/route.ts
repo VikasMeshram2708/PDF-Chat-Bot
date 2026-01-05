@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
+import { jobEvents } from "@/lib/job-events";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,10 +35,15 @@ export async function POST(req: NextRequest) {
     const filePath = path.join(uploadDir, fileName);
 
     fs.writeFileSync(filePath, buffer);
-    // inngest call
+    // IMPORTANT
+    const jobId = crypto.randomUUID();
+
+    // inngest call simulation
+    processPdfAsync(jobId);
     // respond
     return NextResponse.json({
       success: true,
+      jobId,
       message: "File uploaded",
     });
   } catch (error) {
@@ -47,4 +53,10 @@ export async function POST(req: NextRequest) {
       error: (error as Error).message,
     });
   }
+}
+
+async function processPdfAsync(jobId: string) {
+  await new Promise((r) => setTimeout(r, 5000)); // simulate ingestion
+  console.log("EMITTING EVENT FOR", jobId);
+  jobEvents.emit(jobId); // 🔔 event AFTER client subscribes
 }
