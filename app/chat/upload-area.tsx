@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UploadIcon } from "lucide-react";
+import { toast } from "sonner";
+import axios from "axios";
 
 export function UploadArea() {
   const handleFileSelect = () => {
@@ -9,13 +11,32 @@ export function UploadArea() {
     input.type = "file";
     input.accept = "application/pdf";
 
-    input.onchange = () => {
+    input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return;
 
       console.log("Selected file:", file);
 
       // TODO: enqueue upload / call API here
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await axios.post("/api/file/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        const result = await res.data;
+        console.log("res", result);
+        if (!result.success) {
+          toast.error(result.message ?? "Failed");
+          return;
+        }
+        toast.success(result?.message ?? "Uploaded");
+      } catch (error) {
+        console.error("error ", error);
+        toast.error("Upload failed.");
+      }
     };
 
     // Required for Safari + Firefox
