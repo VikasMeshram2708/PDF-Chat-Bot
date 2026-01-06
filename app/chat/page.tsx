@@ -1,5 +1,4 @@
 import { ChatBox } from "./chat-box";
-import { ChatMessages } from "./chat-messages";
 import { UploadArea } from "./upload-area";
 
 export default function ChatPage() {
@@ -9,9 +8,6 @@ export default function ChatPage() {
         {/* upload area  */}
         <UploadArea />
         <div className="flex flex-col gap-2 w-full">
-          {/* chat messages */}
-          <ChatMessages />
-          {/* chatbox */}
           <ChatBox />
         </div>
       </div>

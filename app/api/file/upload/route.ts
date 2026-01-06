@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
 
     const file = formData.get("file") as File | null;
-    console.log("server-rec", file);
+    // console.log("server-rec", file);
 
     // sanitization
     if (!file) {

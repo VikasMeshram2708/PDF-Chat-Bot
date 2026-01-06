@@ -45,7 +45,7 @@ export function UploadArea() {
 
         const res = await axios.post("/api/file/upload", formData);
         const result = await res.data;
-        console.log("result", result);
+        // console.log("result", result);
 
         if (!result.success) {
           toast.error(result.message);
@@ -69,17 +69,17 @@ export function UploadArea() {
         const eventSource = new EventSource(`/api/file/events/${documentId}`);
         eventRef.current = eventSource;
         eventSource.onopen = () => {
-          console.log("sse-established");
+          // console.log("sse-established");
         };
         eventSource.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          console.log("SSE_data", data);
+          // console.log("SSE_data", data);
           toast.success("File ready of Q&A!");
           eventSource.close();
         };
 
         eventSource.onerror = (error) => {
-          console.log("sse-error", error);
+          // console.log("sse-error", error);
           toast.error("Error processing file");
           eventSource.close();
         };

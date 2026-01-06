@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const resolvedParams = await Promise.resolve(params);
   const { documentId } = resolvedParams;
-  console.log("sse-params", documentId);
+  // console.log("sse-params", documentId);
 
   // create readable stream
   const stream = new ReadableStream({

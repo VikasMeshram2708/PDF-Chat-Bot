@@ -21,7 +21,7 @@ export const fileUpload = inngest.createFunction(
   { event: "upload/file" },
   async ({ event, step }) => {
     const { fileName, filePath, documentId } = event.data;
-    console.log("documentId", documentId);
+    // console.log("documentId", documentId);
 
     if (!fileName || !filePath) {
       throw new Error("Invalid file data");
