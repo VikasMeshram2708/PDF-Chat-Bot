@@ -4,6 +4,9 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     GROQ_API_KEY: z.string().min(1, "GROQ_API_KEY is required"),
+    GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY is required"),
+    QDRANT_DB_API_KEY: z.string().min(1, "QDRANT_DB_API_KEY is required"),
+    QDRANT_URL: z.string().min(1, "QDRANT_URL is required"),
   },
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z
@@ -15,6 +18,9 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+    QDRANT_DB_API_KEY: process.env.QDRANT_DB_API_KEY,
+    QDRANT_URL: process.env.QDRANT_URL,
   },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   // experimental__runtimeEnv: {

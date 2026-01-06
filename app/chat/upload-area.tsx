@@ -4,8 +4,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { useEffect, useRef } from "react";
 
 export function UploadArea() {
+  const eventRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    // const eventSource = new EventSource("/api/file/events");
+    // eventSource.onopen = () => {
+    //   console.log("SSE-established!!!");
+    // };
+    // eventSource.onmessage = (event) => {
+    //   const data = JSON.parse(event.data);
+    //   console.log("SSE-Data", data);
+    // };
+
+    // eventSource.onerror = (error) => {
+    //   console.log("SSE-error", error);
+    //   eventSource.close();
+    // };
+
+    return () => {
+      eventRef.current?.close();
+      eventRef.current = null;
+    };
+  }, []);
+
   const handleFileSelect = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -29,23 +53,35 @@ export function UploadArea() {
         }
 
         toast.success("Processing your file…");
-        const jobId = result?.jobId;
-        console.log("jobId-cl", jobId);
-        if (!jobId) {
-          toast.error("Job ID missing from server");
-          return;
+        // close existing sse connections
+        if (eventRef.current) {
+          eventRef.current.close();
+          eventRef.current = null;
         }
 
-        // 🔥 OPEN SSE
-        const es = new EventSource(`/api/file/events?jobId=${result.jobId}`);
+        // connect to sse
+        const documentId = result?.documentId;
 
-        es.onmessage = (event) => {
+        if (!documentId) {
+          toast.error("Missing document id");
+          return;
+        }
+        const eventSource = new EventSource(`/api/file/events/${documentId}`);
+        eventRef.current = eventSource;
+        eventSource.onopen = () => {
+          console.log("sse-established");
+        };
+        eventSource.onmessage = (event) => {
           const data = JSON.parse(event.data);
+          console.log("SSE_data", data);
+          toast.success("File ready of Q&A!");
+          eventSource.close();
+        };
 
-          if (data.status === "ready") {
-            toast.success("PDF ready for Q&A");
-            es.close();
-          }
+        eventSource.onerror = (error) => {
+          console.log("sse-error", error);
+          toast.error("Error processing file");
+          eventSource.close();
         };
       } catch (error) {
         toast.error("Upload failed");

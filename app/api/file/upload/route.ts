@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
-import { jobEvents } from "@/lib/job-events";
+import { inngest } from "@/app/inngest/client";
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
     const file = formData.get("file") as File | null;
-    console.log("s", file);
+    console.log("server-rec", file);
+
     // sanitization
     if (!file) {
       return NextResponse.json({
@@ -35,16 +36,31 @@ export async function POST(req: NextRequest) {
     const filePath = path.join(uploadDir, fileName);
 
     fs.writeFileSync(filePath, buffer);
-    // IMPORTANT
-    const jobId = crypto.randomUUID();
 
-    // inngest call simulation
-    processPdfAsync(jobId);
+    // return processing response
+    NextResponse.json({
+      success: true,
+      message: "File processing...",
+    });
+
+    const documentId = crypto.randomUUID();
+
+    // inngest call
+    await inngest.send({
+      name: "upload/file",
+      data: {
+        fileName: file.name,
+        filePath: filePath,
+        documentId: documentId,
+      },
+    });
+
     // respond
     return NextResponse.json({
       success: true,
-      jobId,
+      //   jobId,
       message: "File uploaded",
+      documentId,
     });
   } catch (error) {
     return NextResponse.json({
@@ -53,10 +69,4 @@ export async function POST(req: NextRequest) {
       error: (error as Error).message,
     });
   }
-}
-
-async function processPdfAsync(jobId: string) {
-  await new Promise((r) => setTimeout(r, 5000)); // simulate ingestion
-  console.log("EMITTING EVENT FOR", jobId);
-  jobEvents.emit(jobId); // 🔔 event AFTER client subscribes
 }
