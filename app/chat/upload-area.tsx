@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,13 +73,13 @@ export function UploadArea() {
           // console.log("sse-established");
         };
         eventSource.onmessage = (event) => {
-          const data = JSON.parse(event.data);
+          JSON.parse(event.data);
           // console.log("SSE_data", data);
           toast.success("File ready of Q&A!");
           eventSource.close();
         };
 
-        eventSource.onerror = (error) => {
+        eventSource.onerror = () => {
           // console.log("sse-error", error);
           toast.error("Error processing file");
           eventSource.close();

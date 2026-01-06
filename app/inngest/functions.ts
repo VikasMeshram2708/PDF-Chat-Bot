@@ -19,8 +19,8 @@ export const fileUpload = inngest.createFunction(
     },
   },
   { event: "upload/file" },
-  async ({ event, step }) => {
-    const { fileName, filePath, documentId } = event.data;
+  async ({ event }) => {
+    const { fileName, filePath } = event.data;
     // console.log("documentId", documentId);
 
     if (!fileName || !filePath) {

@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ documentId: string }> }
 ) {
-  const resolvedParams = await Promise.resolve(params);
-  const { documentId } = resolvedParams;
+  // const resolvedParams = await Promise.resolve(params);
+  // const { documentId } = resolvedParams;
   // console.log("sse-params", documentId);
 
   // create readable stream
