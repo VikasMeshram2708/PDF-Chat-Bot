@@ -5,7 +5,7 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { QdrantVectorStore } from "@langchain/qdrant";
 
-const embeddings = new GoogleGenerativeAIEmbeddings({
+export const embeddings = new GoogleGenerativeAIEmbeddings({
   apiKey: env.GOOGLE_API_KEY,
   model: "text-embedding-004",
 });
