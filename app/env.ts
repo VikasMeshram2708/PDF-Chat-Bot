@@ -3,6 +3,8 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
+    DATABASE_URL: z.string().url("DATABASE_URL is required"),
+    CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
     GROQ_API_KEY: z.string().min(1, "GROQ_API_KEY is required"),
     GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY is required"),
     QDRANT_DB_API_KEY: z.string().min(1, "QDRANT_DB_API_KEY is required"),
@@ -13,8 +15,9 @@ export const env = createEnv({
       .string()
       .min(1, "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is required"),
   },
-  // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   runtimeEnv: {
+    DATABASE_URL: process.env.DATABASE_URL,
+    CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
@@ -22,10 +25,6 @@ export const env = createEnv({
     QDRANT_DB_API_KEY: process.env.QDRANT_DB_API_KEY,
     QDRANT_URL: process.env.QDRANT_URL,
   },
-  // For Next.js >= 13.4.4, you only need to destructure client variables:
-  // experimental__runtimeEnv: {
-  //   NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
-  // }
   onValidationError: (issues) => {
     console.error("❌ Invalid environment variables:", issues);
     throw new Error("Invalid environment variables");
