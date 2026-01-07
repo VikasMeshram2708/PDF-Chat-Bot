@@ -8,6 +8,7 @@ export const env = createEnv({
     GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY is required"),
     QDRANT_DB_API_KEY: z.string().min(1, "QDRANT_DB_API_KEY is required"),
     QDRANT_URL: z.string().min(1, "QDRANT_URL is required"),
+    INNGEST_SIGNING_KEY: z.string().min(1, "INNGEST_SIGNING_KEY is required"),
   },
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z
@@ -22,6 +23,7 @@ export const env = createEnv({
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
     QDRANT_DB_API_KEY: process.env.QDRANT_DB_API_KEY,
     QDRANT_URL: process.env.QDRANT_URL,
+    INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
   },
   onValidationError: (issues) => {
     console.error("❌ Invalid environment variables:", issues);

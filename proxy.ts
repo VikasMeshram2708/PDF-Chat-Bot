@@ -4,7 +4,7 @@ const isPrivateRoute = createRouteMatcher(["/chat(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isPrivateRoute(req)) {
-    auth.protect();
+    await auth.protect();
   }
 });
 
