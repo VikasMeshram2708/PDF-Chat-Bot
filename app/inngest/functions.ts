@@ -20,18 +20,28 @@ export const fileUpload = inngest.createFunction(
   },
   { event: "upload/file" },
   async ({ event }) => {
-    const { fileName, filePath } = event.data;
-    // console.log("documentId", documentId);
+    const { fileName, fileUrl } = event.data;
 
-    if (!fileName || !filePath) {
+    if (!fileName || !fileUrl) {
       throw new Error("Invalid file data");
     }
 
-    // load pdf
-    const loader = new PDFLoader(filePath, { splitPages: true });
+    // 1. Download the PDF from the Vercel Blob URL
+    const response = await fetch(fileUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to download file: ${response.statusText}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    // 2. Convert to Blob for PDFLoader
+    const pdfBlob = new Blob([arrayBuffer], { type: "application/pdf" });
+
+    // 3. Load PDF from blob
+    const loader = new PDFLoader(pdfBlob, { splitPages: true });
     const pages = await loader.load();
 
-    // split into chunks
+    // 4. Split into chunks
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 150,
@@ -39,16 +49,17 @@ export const fileUpload = inngest.createFunction(
     });
 
     const chunks = await splitter.splitDocuments(pages);
-    // metadata
+
+    // 5. Add metadata per chunk
     chunks.forEach((doc, index) => {
       doc.metadata = {
         ...doc.metadata,
-        source: fileName ?? filePath,
+        source: fileName ?? fileUrl,
         chunkIndex: index,
       };
     });
 
-    // connect to qdrant
+    // 6. Connect to Qdrant
     const vectorStore = await QdrantVectorStore.fromExistingCollection(
       embeddings,
       {
@@ -58,6 +69,7 @@ export const fileUpload = inngest.createFunction(
       }
     );
 
+    // 7. Store chunks in vector DB
     await vectorStore.addDocuments(chunks);
 
     return { success: true };

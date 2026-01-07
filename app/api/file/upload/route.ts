@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
 import { inngest } from "@/app/inngest/client";
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,16 +25,14 @@ export async function POST(req: NextRequest) {
     }
 
     // directory for file uploads
-    const uploadDir = path.join(process.cwd(), "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
+    // const { url } = await put('articles/blob.txt', 'Hello World!', { access: 'public' });
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = `pdf-${Date.now()}.pdf`;
-    const filePath = path.join(uploadDir, fileName);
 
-    fs.writeFileSync(filePath, buffer);
+    // Upload to Vercel Blob
+    const uploaded = await put(`pdf-${Date.now()}.pdf`, buffer, {
+      access: "public",
+      contentType: "application/pdf",
+    });
 
     // return processing response
     NextResponse.json({
@@ -50,7 +47,7 @@ export async function POST(req: NextRequest) {
       name: "upload/file",
       data: {
         fileName: file.name,
-        filePath: filePath,
+        fileUrl: uploaded.url,
         documentId: documentId,
       },
     });
